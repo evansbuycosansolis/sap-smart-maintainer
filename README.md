@@ -2,7 +2,7 @@
 
 **Version 1.0.0 – PDF Q&A Reader**
 
-SAP Smart Maintainer is a GenAI-powered assistant built to complement SAP Plant Maintenance (PM) systems. This project is being developed progressively, with each version introducing a new feature or enhancement.
+SAP Smart Maintainer is a GenAI-powered assistant built to complement SAP Plant Maintenance (PM) systems.
 
 ---
 
