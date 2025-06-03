@@ -1,6 +1,6 @@
 # SAP Smart Maintainer
 
-**Version 1.0.0 – PDF Q&A Reader**
+## Version 1.0.0 – PDF Q&A Reader
 
 SAP Smart Maintainer is a GenAI-powered assistant built to complement SAP Plant Maintenance (PM) systems.
 
@@ -22,6 +22,7 @@ SAP Smart Maintainer is a GenAI-powered assistant built to complement SAP Plant 
 - **PyPDFLoader** – to parse and split PDF documents
 
 ## Project Structure
+
 sap-smart-maintainer/
 ├── backend/
 │ ├── main.py # FastAPI app for PDF Q&A
@@ -33,6 +34,4 @@ sap-smart-maintainer/
 ## How to Run Locally
 
 1. Clone the repo:
-   ```bash
-   git clone (https://github.com/evansbuycosansolis/sap-smart-maintainer.git
-  
+git clone [https://github.com/evansbuycosansolis/sap-smart-maintainer.git]
