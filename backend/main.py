@@ -1,4 +1,5 @@
 from openai import OpenAI
+from fastapi import Request
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.concurrency import run_in_threadpool
@@ -9,6 +10,9 @@ from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv, find_dotenv
 import shutil
 import os
+
+
+
 
 # ===== Load from .env file =====
 dotenv_path = find_dotenv()
@@ -105,3 +109,50 @@ async def ask_pdf(question: str = Form(...), filename: str = Form(...)):
     except Exception as e:
         print("Error in /ask-pdf:", e)
         return {"answer": f"Error processing your question: {str(e)}"}
+    
+# ===== Route: Ask a question about all PDFs in the uploads folder =====
+@app.post("/ask-all-pdfs/")
+async def ask_all_pdfs(request: Request):
+    try:
+        data = await request.json()
+        question = data.get("question")
+        if not question:
+            return {"answer": "No question provided."}
+
+        # Load all PDF files in uploads/
+        all_docs = []
+        for filename in os.listdir(UPLOAD_FOLDER):
+            if filename.endswith(".pdf"):
+                path = os.path.join(UPLOAD_FOLDER, filename)
+                loader = PyPDFLoader(path)
+                docs = loader.load()
+                all_docs.extend(docs)
+
+        if not all_docs:
+            return {"answer": "No PDF documents found in uploads folder."}
+
+        print(f"Loaded {len(all_docs)} pages from all PDFs.")
+
+        # Split documents
+        splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+        chunks = splitter.split_documents(all_docs)
+
+        if not chunks:
+            return {"answer": "Failed to split the documents."}
+
+        print(f"Split into {len(chunks)} chunks.")
+
+        # Setup LLM + Chain
+        llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model="gpt-4o", temperature=0)
+        chain = load_qa_chain(llm, chain_type="stuff")
+
+        if hasattr(chain, "ainvoke"):
+            result = await chain.ainvoke({"input_documents": chunks, "question": question})
+        else:
+            result = await run_in_threadpool(chain.invoke, {"input_documents": chunks, "question": question})
+
+        return {"answer": result.get("output_text", "No answer was generated.")}
+
+    except Exception as e:
+        print("Error in /ask-all-pdfs:", e)
+        return {"answer": "Something went wrong while processing your global question."}

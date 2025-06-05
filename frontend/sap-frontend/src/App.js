@@ -2,86 +2,85 @@ import React, { useState } from "react";
 import axios from "axios";
 import "./App.css";
 
-// This is a simple React app that allows users to upload a PDF file,
-// ask questions about the content of the PDF, and receive answers from a backend service.
 function App() {
   const [file, setFile] = useState(null);
   const [filename, setFilename] = useState("No file chosen");
   const [question, setQuestion] = useState("");
+  const [globalQuestion, setGlobalQuestion] = useState("");
   const [answer, setAnswer] = useState("");
+  const [globalAnswer, setGlobalAnswer] = useState("");
   const [notification, setNotification] = useState("");
   const [showQuestionBox, setShowQuestionBox] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [globalLoading, setGlobalLoading] = useState(false);
 
-  // Function to handle PDF upload
   const handleUpload = async () => {
-    if (!file) {
-      alert("Please choose a PDF first.");
-      return;
-    }
-    if (file.type !== "application/pdf") {
-      alert("Please upload a valid PDF file.");
-      return;
-    }
+    if (!file) return alert("Please choose a PDF first.");
+    if (file.type !== "application/pdf") return alert("Please upload a valid PDF file.");
 
     const formData = new FormData();
     formData.append("pdf", file);
-    
+
     try {
+      setLoading(true);
       await axios.post("http://localhost:8080/upload-pdf/", formData);
       setNotification("PDF uploaded successfully! Now ask a question below.");
       setShowQuestionBox(true);
     } catch (error) {
       console.error("Upload error:", error);
       setNotification("Failed to upload PDF.");
+    } finally {
+      setLoading(false);
     }
   };
 
-
-  // Function to handle asking a question about the uploaded PDF
-  // It sends the question and the filename to the backend service.
-  // The backend service is expected to process the PDF and return an answer.
-  // If the answer is a string, it is displayed directly; otherwise, it is stringified for display.
-  // If an error occurs during the request, an error message is displayed.
-  // The answer is displayed in a styled box below the question input.
-  // The question input is only shown after a successful PDF upload.
-  // The filename is displayed next to the file input, and the upload button is styled.
-  // The app also includes basic error handling for file type and upload errors.
-  // The app uses axios for HTTP requests and maintains state using React hooks.
-  // The app is styled with a simple CSS file for better user experience.
-  // The app is designed to run on a local server at http://localhost:8080.
-  // The app is a frontend for a service that processes PDFs and answers questions about their content.
-  // The app is built with React and uses functional components and hooks for state management.
-
   const handleAsk = async (e) => {
     e.preventDefault();
+    if (!question.trim()) return alert("Enter a question.");
 
     const formData = new FormData();
     formData.append("question", question);
     formData.append("filename", file.name);
 
     try {
+      setLoading(true);
       const res = await axios.post("http://localhost:8080/ask-pdf/", formData);
-
-      if (typeof res.data.answer === "string") {
-        setAnswer(res.data.answer);
-      } else {
-        // handle weird case if answer is still object (fallback)
-        setAnswer(JSON.stringify(res.data.answer, null, 2));
-      }
+      setAnswer(typeof res.data.answer === "string" ? res.data.answer : JSON.stringify(res.data.answer, null, 2));
     } catch (error) {
       console.error("Ask error:", error);
       setAnswer("Something went wrong while processing your question.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  
-  // The main component renders the file upload section, question input, and answer display.
-  // It includes an input for file selection, a button to upload the PDF,
-  // and a form to ask questions about the uploaded PDF.
+  const handleAskAll = async (e) => {
+    e.preventDefault();
+    if (!globalQuestion.trim()) return alert("Enter a global question.");
+
+    try {
+      setGlobalLoading(true);
+      const res = await axios.post("http://localhost:8080/ask-all-pdfs/", {
+        question: globalQuestion,
+      });
+      setGlobalAnswer(res.data.answer || "No answer was generated.");
+    } catch (error) {
+      console.error("Global ask error:", error);
+      setGlobalAnswer("Something went wrong while processing your global question.");
+    } finally {
+      setGlobalLoading(false);
+    }
+  };
+
+  const resetUI = () => {
+    setNotification("");
+    setAnswer("");
+    setShowQuestionBox(false);
+  };
+
   return (
     <div className="container">
       <h1>Ask LLM about this PDF</h1>
-
       <div className="upload-section">
         <input
           type="file"
@@ -89,14 +88,12 @@ function App() {
           onChange={(e) => {
             setFile(e.target.files[0]);
             setFilename(e.target.files[0]?.name || "No file chosen");
-            setNotification("");
-            setAnswer("");
-            setShowQuestionBox(false);
+            resetUI();
           }}
         />
         <span className="filename">{filename}</span>
-        <button className="upload-btn" onClick={handleUpload}>
-          Upload PDF
+        <button className="upload-btn" onClick={handleUpload} disabled={loading}>
+          {loading ? "Uploading..." : "Upload PDF"}
         </button>
       </div>
 
@@ -105,14 +102,16 @@ function App() {
       <div className="question-section">
         {showQuestionBox && (
           <form onSubmit={handleAsk} className="question-form">
-            <label>Ask a question about your PDF:</label>
+            <label>Ask a question about this PDF:</label>
             <input
               type="text"
               value={question}
               placeholder="Enter your question..."
               onChange={(e) => setQuestion(e.target.value)}
             />
-            <button type="submit">Ask</button>
+            <button type="submit" disabled={loading}>
+              {loading ? "Asking..." : "Ask"}
+            </button>
           </form>
         )}
 
@@ -120,11 +119,37 @@ function App() {
           <div className="answer-container">
             <h3>Answer:</h3>
             <div className="answer-box">
-              <p>{answer}</p>
+              <pre>{answer}</pre>
             </div>
           </div>
         )}
+      </div>
 
+      <hr className="divider" />
+
+      {/* ===== Global PDF Q&A Section ===== */}
+      <div className="question-section global">
+        <h1>Ask LLM anything across all stored PDFs</h1>
+        <form onSubmit={handleAskAll} className="question-form">
+          <input
+            type="text"
+            value={globalQuestion}
+            placeholder="Enter your question..."
+            onChange={(e) => setGlobalQuestion(e.target.value)}
+          />
+          <button type="submit" disabled={globalLoading}>
+            {globalLoading ? "Searching..." : "Ask All"}
+          </button>
+        </form>
+
+        {globalAnswer && (
+          <div className="answer-container">
+            <h3>Global Answer:</h3>
+            <div className="answer-box">
+              <pre>{globalAnswer}</pre>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

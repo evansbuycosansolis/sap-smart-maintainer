@@ -23,3 +23,21 @@
 
 - Basic PDF Q&A system using LangChain and GPT-4o
 - React frontend with upload + ask flow
+
+## [1.2.0] - 2025-06-05
+
+Added
+
+- New global Q&A section that allows users to ask questions across **all stored PDFs**
+- New `/ask-all-pdfs/` FastAPI route to handle multi-PDF document processing
+- New React `globalQuestion` + `globalAnswer` UI section with scrollable output
+- Design partition using `<hr />` for clear UI separation between single-PDF and all-PDF questions
+
+Changed
+
+- Refined frontend structure and styling
+- Backend PDF loading uses batch file reading from `/uploads` directory
+
+Fixed
+
+- Better error handling for missing files and malformed questions
