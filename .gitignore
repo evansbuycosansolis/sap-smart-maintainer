@@ -10,6 +10,7 @@ venv/
 ENV/
 env.bak/
 *.env
+backend/.env
 
 # Environment variable files
 .env
@@ -51,3 +52,7 @@ backend/uploads/
 
 # Jupyter
 .ipynb_checkpoints/
+
+# Node
+node_modules/
+.env
