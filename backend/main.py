@@ -1,6 +1,7 @@
 from openai import OpenAI
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.concurrency import run_in_threadpool
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.chains.question_answering import load_qa_chain
@@ -11,9 +12,8 @@ import os
 
 # ===== Load from .env file =====
 dotenv_path = find_dotenv()
-loaded = load_dotenv(dotenv_path)
+loaded = load_dotenv(dotenv_path, override=True)
 print(f".env loaded: {loaded} from {dotenv_path}")
-loaded = load_dotenv(dotenv_path, override=True)  # <-- Force override!
 if not loaded:
     raise ValueError("Failed to load .env file! Make sure it exists and is properly formatted.")
 
@@ -52,6 +52,7 @@ app.add_middleware(
 )
 
 
+
 # ===== Ensure upload folder exists =====
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -73,8 +74,8 @@ async def upload_pdf(pdf: UploadFile = File(...)):
 @app.post("/ask-pdf/")
 async def ask_pdf(question: str = Form(...), filename: str = Form(...)):
     pdf_path = os.path.join(UPLOAD_FOLDER, filename)
-    try:
-        # Load and split PDF
+
+    async def process_question():
         loader = PyPDFLoader(pdf_path)
         docs = loader.load()
         if not docs:
@@ -87,14 +88,20 @@ async def ask_pdf(question: str = Form(...), filename: str = Form(...)):
             return {"answer": "Failed to process PDF content."}
         print(f"Split into {len(chunks)} chunks")
 
-        # Call OpenAI via LangChain
         llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model="gpt-4o", temperature=0)
         chain = load_qa_chain(llm, chain_type="stuff")
-        result = chain.invoke({"input_documents": chunks, "question": question})
-        print("Chain result:", result)
 
+        # Use ainvoke if supported
+        if hasattr(chain, "ainvoke"):
+            result = await chain.ainvoke({"input_documents": chunks, "question": question})
+        else:
+            result = await run_in_threadpool(chain.invoke, {"input_documents": chunks, "question": question})
+
+        print("Chain result:", result)
         return {"answer": result.get("output_text", "No answer was generated.")}
 
+    try:
+        return await process_question()
     except Exception as e:
         print("Error in /ask-pdf:", e)
         return {"answer": f"Error processing your question: {str(e)}"}
