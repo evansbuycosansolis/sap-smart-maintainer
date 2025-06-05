@@ -42,11 +42,11 @@ ap-smart-maintainer/
 
 ### 1. Clone the Repo
 
-```bash
-git clone https://github.com/evansbuycosansolis/sap-smart-maintainer.git
+git clone <https://github.com/evansbuycosansolis/sap-smart-maintainer.git>
 cd sap-smart-maintainer
 
 ### 2. Setup the Backend
+
 cd backend
 python -m venv .venv
 source .venv/bin/activate      # On Windows: .venv\Scripts\activate
@@ -56,17 +56,20 @@ Create a .env file in the backend/ directory:
 OPENAI_API_KEY=sk-...your_openai_key_here...
 
 ### 3. Run the FastAPI Backend
+
 uvicorn main:app --reload --port 8080
 
 ### 4. Run the Frontend (React)
+
 cd ../frontend/sap-frontend
 npm install
 npm start
 
 
 ## Live Demo & Usage
+
 Once running:
-Go to http://localhost:3000
+Go to <http://localhost:3000>
 Upload your PDF manual
 Ask a question about it
 View the AI-generated answer
