@@ -41,3 +41,31 @@ Changed
 Fixed
 
 - Better error handling for missing files and malformed questions
+
+## [v1.3.0] - 2025-06-05
+
+Added
+
+- Integrated FAISS vector store to persistently index all uploaded PDFs for long-term use.
+- Enabled top-k similarity search to retrieve only the most relevant document chunks.
+- Automatically updates the vector index on every new PDF upload.
+- Enhanced `/ask-all-pdfs/` endpoint to use vector-based retrieval instead of full document parsing.
+
+Fixed
+
+- Bug fix in `/ask-all-pdfs/`: added missing `question` extraction from JSON request body.
+
+Dependencies
+
+- Updated `requirements.txt` to include:
+  - `faiss-cpu`
+  - `langchain`
+  - `langchain-openai`
+  - `langchain-community`
+  - `httpx`
+  - `aiofiles`
+
+Notes
+
+- Improves scalability and performance for multi-document question answering.
+- Prepares the backend for production-scale PDF storage and retrieval.
