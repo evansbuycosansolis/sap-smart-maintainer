@@ -1,6 +1,6 @@
 # SAP Smart Maintainer
 
-**Version 1.3.0 – Vector Store Integration for Long-Term PDF Q&A**  
+**Version 1.3.0 – Vector Store Integration for Long-Term PDF Q&A**
 SAP Smart Maintainer is a GenAI-powered assistant built to complement SAP Plant Maintenance (PM) systems by enabling intelligent, long-term PDF manual analysis.
 
 ---

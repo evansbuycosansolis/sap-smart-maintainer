@@ -75,6 +75,28 @@ h3 {
   color: #fff;
 }
 
+.question-form textarea {
+  padding: 0.5rem;
+  min-width: 300px;
+  width: 100%;
+  min-height: 2.5rem;
+  max-height: 200px;
+  border-radius: 4px;
+  border: 1px solid #555;
+  background-color: #121212;
+  color: #fff;
+  resize: vertical;           /* User can drag to expand */
+  overflow-y: auto;
+  font-family: inherit;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.question-form textarea:focus {
+  border-color: #00e5ff;
+  outline: none;
+}
+
 .question-form button {
   padding: 0.5rem 1rem;
   background-color: #00e5ff;
@@ -105,7 +127,6 @@ h3 {
   border: 1px solid #00e5ff;
   background-color: #111;
   border-radius: 6px;
-  white-space: pre-wrap;
   color: #e0f7fa;
 }
 
@@ -113,11 +134,27 @@ h3 {
   padding: 0.5rem;
   background-color: #000;
   border-radius: 5px;
-  overflow-x: auto;
+  /* Force a max height and allow vertical scrolling */
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: hidden;
   font-family: 'Courier New', monospace;
   font-size: 0.95rem;
   color: #00ffff;
-  max-height: 600px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  /* Add this to ensure the pre doesn't expand outside */
+  display: block;
+}
+
+.answer-box pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  /* Make sure pre takes full height/width of its parent */
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .divider {

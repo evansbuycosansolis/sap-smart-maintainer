@@ -103,11 +103,19 @@ function App() {
         {showQuestionBox && (
           <form onSubmit={handleAsk} className="question-form">
             <label>Ask a question about this PDF:</label>
-            <input
-              type="text"
+            <textarea
               value={question}
               placeholder="Enter your question..."
               onChange={(e) => setQuestion(e.target.value)}
+              rows={1}
+              style={{
+                minWidth: 300,
+                maxWidth: "100%",
+                width: "100%",
+                minHeight: 40,
+                maxHeight: 150,
+                resize: "vertical"
+              }}
             />
             <button type="submit" disabled={loading}>
               {loading ? "Asking..." : "Ask"}
@@ -131,11 +139,19 @@ function App() {
       <div className="question-section global">
         <h1>Ask LLM anything across all stored PDFs</h1>
         <form onSubmit={handleAskAll} className="question-form">
-          <input
-            type="text"
+          <textarea
             value={globalQuestion}
             placeholder="Enter your question..."
             onChange={(e) => setGlobalQuestion(e.target.value)}
+            rows={1}
+            style={{
+              minWidth: 300,
+              maxWidth: "100%",
+              width: "100%",
+              minHeight: 40,
+              maxHeight: 150,
+              resize: "vertical"
+            }}
           />
           <button type="submit" disabled={globalLoading}>
             {globalLoading ? "Searching..." : "Ask All"}
