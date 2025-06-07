@@ -1,27 +1,34 @@
 # SAP Smart Maintainer
 
-**Version 1.3.0 – Vector Store Integration for Long-Term PDF Q&A**
-SAP Smart Maintainer is a GenAI-powered assistant built to complement SAP Plant Maintenance (PM) systems by enabling intelligent, long-term PDF manual analysis.
+**Version 1.4.0 – Vector Store
+
+- Amazon S3 Storage: All uploaded PDFs are now stored and loaded from Amazon S3 for scalable, cloud-based access.
+- Smarter Global Q&A: Even if an exact answer isn’t found, you’ll get relevant content from the most appropriate PDF.
+- Responsive UI: Input and answer containers auto-expand and are vertically scrollable for long questions/answers.
+- Fuzzy Filename Matching: Better recognition of PDF names in questions across all stored PDFs.
+- Bug Fixes: Improved stability and reliability..
 
 ---
 
-## PDF Manual Q&A (v1.3.0)
+## PDF Manual Q&A (v1.4.0)
 
-- Upload SAP Plant Maintenance manuals in PDF format
-- Ask questions in natural language
-- **FAISS-based vector search** indexes all PDFs and retrieves the most relevant content
+- Upload SAP Plant Maintenance manuals (PDF) — now stored in Amazon S3
+- Ask questions in natural language about single or all PDFs
+- FAISS-based vector search indexes all PDFs and retrieves the most relevant content
 - Get fast and accurate answers using OpenAI GPT-4o via LangChain
+- If no direct answer is found, you’ll still get the most relevant content
 
 ---
 
 ## Tech Stack
 
-- **Python FastAPI** – lightweight async backend
-- **LangChain** – for LLM chaining, vector search, and document Q&A
-- **OpenAI GPT-4o** – for intelligent response generation
-- **FAISS** – for storing and retrieving relevant PDF chunks
-- **PyPDFLoader** – to parse and chunk PDF documents
-- **React.js** – frontend interface to upload and query PDFs
+- Python FastAPI – Lightweight async backend
+- LangChain – LLM Q&A, vector search, document parsing
+- OpenAI GPT-4o – Intelligent, context-based answers
+- FAISS – Efficient PDF chunk indexing and retrieval
+- Amazon S3 – Cloud storage for all PDFs
+- PyPDFLoader – PDF parsing/chunking
+- React.js – Responsive user interfac
 
 ---
 
@@ -29,13 +36,13 @@ SAP Smart Maintainer is a GenAI-powered assistant built to complement SAP Plant 
 
 sap-smart-maintainer/
 ├── backend/
-│ ├── main.py # FastAPI app for PDF Q&A
-│ ├── uploads/ # Uploaded PDF files
-│ ├── vectorstore/ # FAISS index directory
-│ ├── .env # (Not committed) OpenAI API key
-│ └── requirements.txt # Python dependencies
+│   ├── main.py             # FastAPI app for PDF Q&A
+│   ├── s3_utils.py         # S3 storage utility functions
+│   ├── vectorstore/        # FAISS index directory
+│   ├── .env                # (Not committed) API & S3 keys
+│   └── requirements.txt    # Python dependencies
 ├── frontend/
-│ └── sap-frontend/ # React app for user interface
+│   └── sap-frontend/       # React app for user interface
 ├── .gitignore
 ├── CHANGELOG.md
 └── README.md
@@ -57,7 +64,12 @@ source .venv/bin/activate      # On Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
 Create a .env file in the backend/ directory:
-OPENAI_API_KEY=sk-...your_openai_key_here...
+
+- OPENAI_API_KEY=sk-...your_openai_key_here...
+- AWS_ACCESS_KEY_ID=your_aws_access_key_id
+- AWS_SECRET_ACCESS_KEY=your_aws_secret_key
+- S3_BUCKET_NAME=your_s3_bucket_name
+
 
 ### 3. Run the FastAPI Backend
 
@@ -72,7 +84,8 @@ npm start
 ## Live Demo & Usage
 
 Once running:
-Go to <http://localhost:3000>
-Upload your PDF manual
-Ask a question about it
-View the AI-generated answer
+
+- Go to <http://localhost:3000>
+- Upload your PDF manual (now saved in Amazon S3)
+- Ask a question about it or across all PDFs
+- View the AI-generated answer or relevant document content

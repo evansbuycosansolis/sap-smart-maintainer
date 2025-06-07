@@ -69,3 +69,17 @@ Notes
 
 - Improves scalability and performance for multi-document question answering.
 - Prepares the backend for production-scale PDF storage and retrieval.
+
+## [v1.4.0] – 2025-06-07
+
+Major Changes
+
+- **Switched Storage to Amazon S3:** All uploaded PDFs are now stored and loaded from Amazon S3, enabling scalable, cloud-based storage.
+- **Global Q&A Improvements:** Multi-PDF question answering now provides more relevant content, even when an exact answer isn’t found.
+- **Responsive UI:** Input and output containers grow vertically and are scrollable for large content, improving user experience on all devices.
+- **Enhanced Context Matching:** Better fuzzy filename matching for more reliable PDF selection when asking questions across all PDFs.
+- **Bug Fixes & Minor UI Tweaks:** Resolved issues with scrollbars and answer boxes.
+
+Upgrade Notes
+
+- You must configure your S3 credentials and bucket details in your `.env` file for uploads and retrieval to work.
