@@ -1,173 +1,275 @@
-/* General layout */
-body {
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #1e1e1e;
-  color: #e0f7fa;
-  text-align: center;
-  margin: 0;
-  padding: 2rem;
-}
-
+/* frontend/sap-frontend/src/App.css */
+/* --- General Container --- */
 .container {
   max-width: 900px;
-  margin: 0 auto;
+  margin: 32px auto;
+  background: #222;
+  border-radius: 12px;
+  padding: 30px 24px 60px 24px;
+  color: #eee;
+  box-shadow: 0 6px 36px #0006;
+  border: 2px solid #444;
 }
 
-/* Headings */
+/* --- Accessibility: Focus outlines --- */
+.doc-type-btn:focus-visible,
+.upload-btn:focus-visible,
+.question-form button[type="submit"]:focus-visible {
+  outline: 3px solid #19fa59;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px #19fa5920;
+}
+
+/* --- Mobile: Larger doc-type buttons --- */
+@media (max-width: 650px) {
+  .container { padding: 10px 2vw 38px 2vw; }
+  .doc-type-grid { grid-template-columns: 1fr; }
+  .answer-container { padding: 0 3vw; }
+  .upload-section { flex-direction: column; gap: 9px; }
+  .doc-type-btn {
+    font-size: 1.13rem;
+    padding: 16px 22px;
+  }
+}
+
+/* --- Scrollbar for answers --- */
+.answer-box::-webkit-scrollbar {
+  width: 10px;
+  background: #232b2d;
+}
+.answer-box::-webkit-scrollbar-thumb {
+  background: #14582e;
+  border-radius: 8px;
+}
+
+/* --- Highlight for answer box --- */
+.answer-box.highlight {
+  animation: flashGreen 0.8s;
+}
+@keyframes flashGreen {
+  from { background: #19fa5960; }
+  to   { background: #222; }
+}
+
+/* --- Notification fade-in --- */
+.notification {
+  animation: fadeInDown 0.5s ease;
+  opacity: 0.98;
+  background: #181;
+  color: #fff;
+  border-radius: 5px;
+  margin: 10px auto 22px auto;
+  padding: 9px 18px;
+  width: fit-content;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: .02em;
+}
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  to {
+    opacity: 0.98;
+    transform: translateY(0);
+  }
+}
+
+/* --- Headings --- */
 h1 {
-  color: #00e676;
-  margin-bottom: 1.5rem;
+  font-size: 2.1rem;
+  margin-bottom: 16px;
+  color: #19fa59;
+  text-align: center;
+  font-weight: bold;
+}
+.question-section.global h1 {
+  color: #19fa59;
+  font-size: 1.7rem;
+  margin-bottom: 18px;
 }
 
-h2 {
-  color: #ffffff;
-  margin-top: 3rem;
-  margin-bottom: 1rem;
-}
-
-h3 {
-  color: #00e5ff;
-  margin-bottom: 1rem;
-}
-
-/* Upload section */
+/* --- Upload Section --- */
 .upload-section {
-  margin-bottom: 1.5rem;
-}
-
-.filename {
-  margin: 0 1rem;
-  font-style: italic;
-}
-
-.upload-btn {
-  padding: 0.5rem 1rem;
-  background-color: #00e5ff;
-  border: none;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.upload-btn:disabled {
-  background-color: #555;
-  cursor: not-allowed;
-}
-
-/* Question form */
-.question-section {
-  margin-top: 2rem;
-}
-
-.question-form {
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 0.5rem;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 18px;
   flex-wrap: wrap;
 }
-
-.question-form input[type="text"] {
-  padding: 0.5rem;
-  width: 300px;
-  border-radius: 4px;
-  border: 1px solid #555;
-  background-color: #121212;
-  color: #fff;
+.upload-btn {
+  background: #19fae2;
+  border: none;
+  color: #181818;
+  padding: 8px 20px;
+  border-radius: 7px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.upload-btn:disabled {
+  background: #43d1b2;
+  color: #eee;
+  cursor: not-allowed;
+}
+.filename {
+  color: #aaa;
+  font-style: italic;
+  max-width: 200px;
+  overflow-wrap: anywhere;
 }
 
-.question-form textarea {
-  padding: 0.5rem;
-  min-width: 300px;
+/* --- Divider Line --- */
+.divider {
+  margin: 38px 0 28px 0;
+  border: none;
+  border-top: 2px solid #195;
   width: 100%;
-  min-height: 2.5rem;
-  max-height: 200px;
-  border-radius: 4px;
-  border: 1px solid #555;
-  background-color: #121212;
-  color: #fff;
-  resize: vertical;           /* User can drag to expand */
-  overflow-y: auto;
-  font-family: inherit;
-  font-size: 1rem;
-  transition: border-color 0.2s;
+  opacity: 0.4;
 }
 
-.question-form textarea:focus {
-  border-color: #00e5ff;
+/* --- Question Section --- */
+.question-section {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+/* --- Doc Type Grid --- */
+.doc-type-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 13px 22px;
+  margin: 0 auto 18px auto;
+  max-width: 700px;
+  justify-items: stretch;
+  align-items: stretch;
+}
+.doc-type-btn {
+  background: #3b7bd6;
+  color: #fff;
+  border: 2px solid #1d4a83;
+  border-radius: 9px;
+  padding: 13px 18px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s,
+    box-shadow 0.15s;
+  text-align: left;
+  box-shadow: 0 2px 8px #0003;
   outline: none;
 }
-
-.question-form button {
-  padding: 0.5rem 1rem;
-  background-color: #00e5ff;
-  border: none;
-  border-radius: 4px;
-  color: #000;
-  font-weight: bold;
-  cursor: pointer;
+.doc-type-btn.selected,
+.doc-type-btn:hover {
+  background: #19fa59;
+  color: #111;
+  border-color: #10a038;
+  box-shadow: 0 2px 18px #19fa5960;
 }
 
-.question-form button:disabled {
-  background-color: #444;
+/* --- Question Form --- */
+.question-form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 9px;
+  margin: 0 auto 0 auto;
+  max-width: 630px;
+}
+.question-form label {
+  font-size: 1.07rem;
+  color: #55ffaf;
+  text-align: left;
+  margin-bottom: 3px;
+}
+.question-form textarea {
+  background: #121920;
+  border: 2px solid #333;
+  color: #fff;
+  border-radius: 6px;
+  font-size: 1rem;
+  padding: 11px 13px;
+  outline: none;
+  transition: border 0.2s;
+  resize: vertical;
+}
+.question-form textarea:focus {
+  border: 2px solid #19fa59;
+  background: #101a15;
+}
+.question-form button[type="submit"] {
+  margin-top: 8px;
+  background: #19fa59;
+  color: #181818;
+  border: none;
+  border-radius: 7px;
+  padding: 9px 0;
+  font-weight: bold;
+  font-size: 1.09rem;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+.question-form button[disabled] {
+  background: #95cfa1;
+  color: #444;
   cursor: not-allowed;
 }
 
-/* Notifications */
-.notification {
-  margin-top: 1rem;
-  color: #00e676;
-  font-weight: bold;
-}
-
-/* Answer styling */
+/* --- Answer Container --- */
 .answer-container {
-  margin-top: 1.5rem;
+  margin: 26px auto 0 auto;
+  max-width: 680px;
   text-align: left;
-  padding: 1rem;
-  border: 1px solid #00e5ff;
-  background-color: #111;
-  border-radius: 6px;
-  color: #e0f7fa;
 }
-
+.answer-container h3 {
+  color: #19fa59;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
 .answer-box {
-  padding: 0.5rem;
-  background-color: #000;
-  border-radius: 5px;
-  /* Force a max height and allow vertical scrolling */
-  max-height: 400px;
+  background: #222;
+  color: #b2ffb2;
+  border-radius: 10px;
+  padding: 16px;
+  font-size: 1.05rem;
+  margin-top: 10px;
+  min-height: 48px;
+  max-height: 60vh;
   overflow-y: auto;
-  overflow-x: hidden;
-  font-family: 'Courier New', monospace;
-  font-size: 0.95rem;
-  color: #00ffff;
-  white-space: pre-wrap;
   word-break: break-word;
-  /* Add this to ensure the pre doesn't expand outside */
-  display: block;
+  transition: max-height 0.3s;
 }
 
-.answer-box pre {
-  margin: 0;
-  white-space: pre-wrap;
-  word-break: break-word;
-  /* Make sure pre takes full height/width of its parent */
-  height: 100%;
-  width: 100%;
-  box-sizing: border-box;
+/* --- Indexing Progress Bar --- */
+.indexing-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #222;
+  color: #b2ffb2;
+  border-radius: 10px;
+  margin: 20px 0 16px 0;
+  padding: 10px;
+  font-size: 1.05rem;
+  min-height: 44px;
+  gap: 14px;
 }
 
-.divider {
-  border: none;
-  height: 2px;
-  background: linear-gradient(90deg, #00e5ff, #00ffc8);
-  animation: pulse 3s infinite ease-in-out;
-  width: 80%;
-  margin: 3rem auto;
-  opacity: 0.7;
+/* --- Spinner Animation --- */
+.spinner {
+  border: 4px solid #666;
+  border-top: 4px solid #41fd41;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  animation: spin 1s linear infinite;
 }
-
-@keyframes pulse {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 1; }
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
