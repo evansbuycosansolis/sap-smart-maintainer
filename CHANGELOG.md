@@ -83,3 +83,40 @@ Major Changes
 Upgrade Notes
 
 - You must configure your S3 credentials and bucket details in your `.env` file for uploads and retrieval to work.
+
+## [v1.5.0] – 2025-06-08
+
+Major Changes
+
+- ull S3 Document Workflow: All PDFs are uploaded, stored, and indexed from Amazon S3 for true scalability and cross-session access.
+- Batch Auto-Indexing: On every server start, all S3 PDFs are batch-indexed for rapid search and reliable answers.
+- Cleaner UI/UX.
+  - Auto-scrolls to answer after each upload or question.
+  - Improved progress bar logic—auto-resets on clear/upload, less redundant polling.
+  - Smoother mobile experience, card layout, and animated notifications.
+  - Accessibility improvements (keyboard focus, larger touch areas)
+
+Added
+
+- Auto-indexing script: New service automatically builds or updates vectorstore from all PDFs in S3.
+- UI polish: Animations, notification fade-in, and responsive design.
+- Feedback: Users get instant feedback after uploading or asking, with auto-scroll to answer.
+
+Changed
+
+- Polling Logic: Simplified frontend polling for indexing status—now only runs while indexing is active.
+- Frontend Reset Logic: All UI state and progress bar now auto-clear on file change or reset.
+- Backend Refactor:
+  - Unified logging (replaced print with logger).
+  - Service and utility modules cleaned up.
+
+Fixed
+
+- Progress Bar: No longer stuck or redundant after clear/upload.
+- Category selection & error states: More robust error handling in frontend and backend.
+
+Notes
+
+- Make sure your .env file includes S3 and OpenAI keys.
+- For production, always restrict CORS to your frontend domain.
+- This version is ready for large-scale PDF libraries with cloud storage and fast search!

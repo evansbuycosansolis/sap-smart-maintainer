@@ -1,12 +1,13 @@
 # SAP Smart Maintainer
 
-**Version 1.4.0 – Vector Store
+**Version 1.5.0 – S3 Storage, UI/UX Polish, Auto-Indexing
 
-- Amazon S3 Storage: All uploaded PDFs are now stored and loaded from Amazon S3 for scalable, cloud-based access.
-- Smarter Global Q&A: Even if an exact answer isn’t found, you’ll get relevant content from the most appropriate PDF.
-- Responsive UI: Input and answer containers auto-expand and are vertically scrollable for long questions/answers.
-- Fuzzy Filename Matching: Better recognition of PDF names in questions across all stored PDFs.
-- Bug Fixes: Improved stability and reliability..
+- Amazon S3 Storage: All uploaded PDFs are stored and loaded from Amazon S3 for true scalability.
+- Smarter Q&A: AI gives you relevant content—even if no exact answer exists—from the most appropriate document.
+- Batch Auto-Indexing: On server start, all S3 PDFs are indexed for fast search.
+- Cleaner & Responsive UI: Seamless mobile/desktop support, auto-scrolling to answers, and animated feedback.
+- Fuzzy Filename Matching: Recognizes and matches PDF names within your questions for accurate retrieval.
+- Bug Fixes & Reliability: Progress bar auto-resets, error handling improved, and overall app is more robust..
 
 ---
 
@@ -15,8 +16,8 @@
 - Upload SAP Plant Maintenance manuals (PDF) — now stored in Amazon S3
 - Ask questions in natural language about single or all PDFs
 - FAISS-based vector search indexes all PDFs and retrieves the most relevant content
-- Get fast and accurate answers using OpenAI GPT-4o via LangChain
-- If no direct answer is found, you’ll still get the most relevant content
+- Powered by OpenAI GPT-4o & LangChain for contextual answers
+- If no direct answer is found, you’ll still get the most relevant content.
 
 ---
 
@@ -37,7 +38,8 @@
 sap-smart-maintainer/
 ├── backend/
 │   ├── main.py             # FastAPI app for PDF Q&A
-│   ├── s3_utils.py         # S3 storage utility functions
+│   ├── api/                # API routes
+│   ├── services/           # S3, PDF, vector utilities
 │   ├── vectorstore/        # FAISS index directory
 │   ├── .env                # (Not committed) API & S3 keys
 │   └── requirements.txt    # Python dependencies
