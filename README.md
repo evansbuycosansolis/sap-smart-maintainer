@@ -11,13 +11,23 @@
 
 ---
 
-## PDF Manual Q&A (v1.4.0)
+## PDF Manual Q&A v1.5.0] – 2025-06-08
 
-- Upload SAP Plant Maintenance manuals (PDF) — now stored in Amazon S3
-- Ask questions in natural language about single or all PDFs
-- FAISS-based vector search indexes all PDFs and retrieves the most relevant content
-- Powered by OpenAI GPT-4o & LangChain for contextual answers
-- If no direct answer is found, you’ll still get the most relevant content.
+Major Changes
+
+- Pull S3 Document Workflow: All PDFs are uploaded, stored, and indexed from Amazon S3 for true scalability and cross-session access.
+- Batch Auto-Indexing: On every server start, all S3 PDFs are batch-indexed for rapid search and reliable answers.
+- Cleaner UI/UX.
+  - Auto-scrolls to answer after each upload or question.
+  - Improved progress bar logic—auto-resets on clear/upload, less redundant polling.
+  - Smoother mobile experience, card layout, and animated notifications.
+  - Accessibility improvements (keyboard focus, larger touch areas)
+
+Added
+
+- Auto-indexing script: New service automatically builds or updates vectorstore from all PDFs in S3.
+- UI polish: Animations, notification fade-in, and responsive design.
+- Feedback: Users get instant feedback after uploading or asking, with auto-scroll to answer.
 
 ---
 

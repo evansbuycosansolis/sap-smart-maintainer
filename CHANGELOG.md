@@ -88,7 +88,7 @@ Upgrade Notes
 
 Major Changes
 
-- ull S3 Document Workflow: All PDFs are uploaded, stored, and indexed from Amazon S3 for true scalability and cross-session access.
+- Pull S3 Document Workflow: All PDFs are uploaded, stored, and indexed from Amazon S3 for true scalability and cross-session access.
 - Batch Auto-Indexing: On every server start, all S3 PDFs are batch-indexed for rapid search and reliable answers.
 - Cleaner UI/UX.
   - Auto-scrolls to answer after each upload or question.
