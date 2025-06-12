@@ -1,44 +1,37 @@
-# backend/main.py
-
+import os
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from api.pdf_routes import router as pdf_router
-from services.s3_auto_index import auto_index_all_pdfs_in_s3
-from fastapi.responses import JSONResponse
-from status import indexing_status
+from config import setup_cors
+from services.s3_service import download_all_pdfs_from_s3
+from services.vectorstore_manager import load_faiss_index
 
-app = FastAPI(
-    title="SAP Smart Maintainer API",
-    description="Backend API for PDF management and LLM integration",
-    version="1.5.0"  # Update to match your actual release!
-)
+PDF_UPLOAD_DIR = "uploads"
 
-# CORS configuration
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],      # For production, use your frontend URL(s)
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-@app.get("/")
-def read_root():
-    """Health check endpoint."""
-    return {
-        "status": "ok",
-        "message": "SAP Smart Maintainer backend is running."
-    }
-
-@app.get("/api/indexing-status/")
-def get_indexing_status():
-    """Get real-time status of S3 auto-indexing."""
-    return JSONResponse(content=indexing_status)
+app = FastAPI()
+setup_cors(app)
+app.include_router(pdf_router)
 
 @app.on_event("startup")
-def startup_event():
-    """Auto-index all S3 PDFs on server startup."""
-    auto_index_all_pdfs_in_s3()
+async def startup_event():
+    # Step 1: Ensure upload dir exists
+    os.makedirs(PDF_UPLOAD_DIR, exist_ok=True)
+    print(f"[STARTUP] Upload directory: {os.path.abspath(PDF_UPLOAD_DIR)}")
 
-# Mount PDF API router under /api
-app.include_router(pdf_router, prefix="/api")
+    pdfs = [
+        f for f in os.listdir(PDF_UPLOAD_DIR)
+        if f.lower().endswith(".pdf")
+        and os.path.isfile(os.path.join(PDF_UPLOAD_DIR, f))
+        and not f.startswith('.')
+    ]
+    if not pdfs:
+        print("[STARTUP] No PDFs found locally. Downloading from S3...")
+        await download_all_pdfs_from_s3(PDF_UPLOAD_DIR)
+    else:
+        print(f"[STARTUP] Found {len(pdfs)} PDFs locally. Skipping S3 download.")
+
+    # Step 2: Load FAISS index if present
+    loaded = load_faiss_index()
+    if loaded:
+        print("[STARTUP] FAISS index loaded for queries.")
+    else:
+        print("[STARTUP] No FAISS index found. Please re-index or upload PDFs.")

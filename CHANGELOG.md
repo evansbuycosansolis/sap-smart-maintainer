@@ -120,3 +120,55 @@ Notes
 - Make sure your .env file includes S3 and OpenAI keys.
 - For production, always restrict CORS to your frontend domain.
 - This version is ready for large-scale PDF libraries with cloud storage and fast search!
+
+## [v1.6.0] – 2025-06-12
+
+Major Changes
+
+- FAISS Index Deserialization Security
+  - Updated backend to use allow_dangerous_deserialization=True when loading FAISS index and doc metadata. This is now a documented requirement for LangChain/FAISS > 0.1.0, but only if you trust your pickle files (i.e., created by your own app).
+  - Improved vectorstore loading error messages for missing or corrupt indexes.
+
+- AWS S3 Configuration & Robustness
+  - Hardened .env detection and S3 environment variable loading (e.g., AWS_S3_BUCKET), with clearer errors if unset.
+  - Ensured all S3 uploads, downloads, and listings use standardized, sanitized file and folder names (spaces/special chars replaced with underscores).
+
+- UI/UX Improvements
+  - Added Clear button(s) for answer boxes (PDF and Global Q&A), allowing users to instantly reset Q&A output without refreshing the page.
+  - Answer areas and file lists now auto-clear on new actions or resets.
+  - Fine-tuned “Indexing…” status logic and notifications for even better feedback.
+  - Enhanced answer display (better scroll, code-friendly font for output)..
+
+Added
+
+- Auto-indexing script: New service automatically builds or updates vectorstore from all PDFs in S3.
+- UI polish: Animations, notification fade-in, and responsive design.
+- Feedback: Users get instant feedback after uploading or asking, with auto-scroll to answer.
+- Manual Clear Buttons
+  - Users can now clear local/global answers with a single click.
+- Bucket Policy/S3 Troubleshooting Documentation
+  - Added more helpful error messages and documentation for AWS S3 public access, permissions, and bucket policy configuration steps.
+
+Changed
+
+- Polling Logic: Simplified frontend polling for indexing status—now only runs while indexing is active.
+- Frontend Reset Logic: All UI state and progress bar now auto-clear on file change or reset.
+- Backend Refactor:
+  - Unified logging (replaced print with logger).
+  - Service and utility modules cleaned up.
+- Vectorstore Loader. Loading from local disk now always uses the correct pickle option, prevents common startup errors.
+- Backend Logging. More informative S3 and FAISS log output (shows config/permission errors, what’s indexed, etc).
+- Sanitization. Further enforced consistent S3 key naming conventions for cross-platform compatibility.
+
+Fixed
+
+- Critical App-Startup Failures. App no longer crashes if FAISS index is missing or S3 environment variables aren’t set—provides clear instructions instead.
+- Bucket Name/Env Case Sensitivity. Resolved issues where S3 env vars were set but not detected due to naming mismatches.
+- Re-index Triggering. Fixed issues with reindex button when indexing already running or S3 misconfigured.Progress Bar: No longer stuck or redundant after clear/upload.
+- Category selection & error states: More robust error handling in frontend and backend.
+
+Notes
+
+- Make sure your .env file includes S3 and OpenAI keys.
+- For production, always restrict CORS to your frontend domain.
+- This version is ready for large-scale PDF libraries with cloud storage and fast search!
