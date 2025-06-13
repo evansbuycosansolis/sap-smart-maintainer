@@ -1,3 +1,5 @@
+# /backend/config.py
+
 import os
 from dotenv import load_dotenv, find_dotenv
 from langchain_openai import OpenAIEmbeddings

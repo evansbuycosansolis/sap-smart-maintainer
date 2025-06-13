@@ -172,3 +172,79 @@ Notes
 - Make sure your .env file includes S3 and OpenAI keys.
 - For production, always restrict CORS to your frontend domain.
 - This version is ready for large-scale PDF libraries with cloud storage and fast search!
+
+
+## [v1.7.0] – 2025-06-13
+
+### Major Changes
+
+#### Predictive Analysis Engine
+- Integrated asset health predictive workflow (LLM-powered) for equipment logs.
+- Added support for custom analysis questions and sensor log upload.
+- Summarizes risk, predicts failures, and outputs actionable recommendations from uploaded logs.
+
+#### Voice Input/Output (Speech Synthesis)
+- Added TTS (text-to-speech) voice output for predictive summaries and Q&A answers.
+- Added voice input support (speech recognition) for Q&A, predictive questions, and search—works across PDF and global ask.
+- Added “Stop All” button and automatic voice-cancel logic to prevent repeated or unwanted speech on app load or when switching tasks.
+
+#### Auto-load & Auto-speak Enhancements
+- Predictive summary now auto-loads and reads result aloud after analysis is complete.
+- Added guards to prevent TTS from speaking empty or default “No” responses.
+- Fixed bug where TTS would repeat or trigger on app load due to default/empty state.
+
+#### Scrollable Context & Summary UI
+- Predictive and context result boxes are now scrollable (with dark theme styling).
+- Improved rendering of asset maintenance context and JSON outputs—better for long or complex responses.
+
+---
+
+### Added
+
+- **Predictive Analysis Panel**
+  - New UI box for predictive questions, log upload, and summary display.
+  - “Ask” button for running custom LLM analysis queries.
+  - Real-time display of risk, predicted failure, recommendation, and action fields.
+- **Voice Experience**
+  - Added automatic TTS output for all answer types (predictive, PDF Q&A, global Q&A).
+  - Added visual voice mode toggle and feedback indicator (GIF/animation when active).
+- **Scrollable Containers**
+  - Scrollbars for asset context lists and raw JSON output, ensuring layout never overflows.
+
+---
+
+### Changed
+
+- **Speech Synthesis/Recognition Logic**
+  - Improved guards to block unwanted TTS on empty/default state.
+  - Speech is now only triggered after valid analysis results (not on “No”/empty).
+  - Defensive programming added to prevent “No” from being read repeatedly.
+- **UX/Notifications**
+  - Fine-tuned notifications and progress bars for clearer feedback during predictive, indexing, and upload tasks.
+  - Auto-scroll to answers after Q&A, predictive analysis, or file upload.
+- **Backend Predictive Analysis API**
+  - Accepts analysis question and log text from user input (query box and upload).
+  - Returns structured output with ML predictions and recommendations.
+
+---
+
+### Fixed
+
+- **Voice “No” Spam**
+  - Fixed bug causing multiple “No” outputs on app load or empty answer.
+  - Resolved repeated TTS activation on state changes or re-render.
+- **Overflow UI/UX**
+  - Fixed predictive/context/JSON boxes overflowing parent containers.
+  - Responsive adjustments for mobile and desktop.
+- **Speech Synthesis Cancel**
+  - `stopAll()` logic now runs at app load, on route changes, and before new voice output.
+- **TTS/Recognition State**
+  - Fixed issues where voice recognition or synthesis would continue running in background.
+
+---
+
+### Notes
+
+- All predictive analysis features require a valid API backend with LLM + ML workflow.
+- To avoid repeated “No” voice output, ensure that result and summary fields are never set to “No” by default; use `null` or `""` instead.
+- For best results, keep `.env` and AWS/OpenAI keys up to date.

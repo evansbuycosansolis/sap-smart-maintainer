@@ -1,3 +1,6 @@
+# /backend/services/pdf_service.py
+
+import re
 import os
 from dotenv import load_dotenv
 from fastapi.concurrency import run_in_threadpool
@@ -62,7 +65,14 @@ prompt = PromptTemplate(
 TMP_DIR = "./tmp"
 os.makedirs(TMP_DIR, exist_ok=True)
 
+
+
+
+
+
 # ======= REINDEX ALL PDFS ==========
+import re
+
 def reindex_all_pdfs():
     print("[INFO] Starting full re-indexing of all S3 PDFs")
     reset_indexing_status()
@@ -71,7 +81,6 @@ def reindex_all_pdfs():
     for folder in S3_FOLDERS:
         filenames = [f for f in list_pdfs_in_s3_folder(folder) if f and isinstance(f, str)]
         print(f"[INFO] Indexing {folder}: {len(filenames)} PDFs")
-        print(f"[DEBUG] Raw filenames from folder {folder}:", filenames)
         for filename in filenames:
             if not isinstance(filename, str) or not filename.strip() or not folder:
                 print(f"[WARN] Invalid filename or folder: {folder}/{filename}")
@@ -93,6 +102,32 @@ def reindex_all_pdfs():
                     continue
                 splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
                 chunks = splitter.split_documents(raw_pages)
+
+                # ========== ENRICH METADATA FOR EACH CHUNK ==========
+                for chunk in chunks:
+                    chunk.metadata["source"] = filename
+
+                    # Equipment/Asset ID
+                    match = re.search(r"(Equipment|Asset)[\s:]+([\w\-]+)", chunk.page_content)
+                    if match:
+                        chunk.metadata["asset_id"] = match.group(2)
+
+                    # Failure Type
+                    match = re.search(r"Failure Type[\s:]+([A-Za-z\s]+)", chunk.page_content)
+                    if match:
+                        chunk.metadata["failure_type"] = match.group(1).strip()
+
+                    # Date
+                    match = re.search(r"Date[\s:]+(\d{4}-\d{2}-\d{2})", chunk.page_content)
+                    if match:
+                        chunk.metadata["date"] = match.group(1)
+
+                    # Handled By
+                    match = re.search(r"Handled By[\s:]+([A-Za-z\s.]+)", chunk.page_content)
+                    if match:
+                        chunk.metadata["handled_by"] = match.group(1).strip()
+                # ========== END METADATA ENRICHMENT ==========
+
                 all_docs.extend(chunks)
             except Exception as e:
                 print(f"[ERROR] Failed to process {filename}: {e}")
@@ -102,6 +137,7 @@ def reindex_all_pdfs():
                     os.remove(local_path)
                 except Exception as e:
                     print(f"[WARN] Could not delete temp file: {e}")
+
     if all_docs:
         print(f"[INFO] Total chunks generated: {len(all_docs)}")
         from langchain_community.vectorstores import FAISS
@@ -112,7 +148,13 @@ def reindex_all_pdfs():
         print("[WARN] No documents were indexed.")
     finish_indexing()
 
-# ======= INCREMENTAL INDEX FOR PDF UPLOAD ==========
+
+
+
+
+
+
+
 def process_and_index_pdf(pdf_file, pdf_filename, category=None, skip_s3_upload=False):
     sanitized_category = sanitize_s3_folder_name(category) if category else None
 
@@ -135,6 +177,35 @@ def process_and_index_pdf(pdf_file, pdf_filename, category=None, skip_s3_upload=
     splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     chunks = splitter.split_documents(docs)
 
+    # ===============================
+    # Enrich metadata for each chunk
+    # ===============================
+    for chunk in chunks:
+        chunk.metadata["source"] = pdf_filename
+
+        # Extract Asset/Equipment ID
+        match = re.search(r"(Equipment|Asset)[\s:]+([\w\-]+)", chunk.page_content)
+        if match:
+            chunk.metadata["asset_id"] = match.group(2)
+
+        # Extract Failure Type
+        match = re.search(r"Failure Type[\s:]+([A-Za-z\s]+)", chunk.page_content)
+        if match:
+            chunk.metadata["failure_type"] = match.group(1).strip()
+
+        # Extract Date
+        match = re.search(r"Date[\s:]+(\d{4}-\d{2}-\d{2})", chunk.page_content)
+        if match:
+            chunk.metadata["date"] = match.group(1)
+
+        # Extract Handled By
+        match = re.search(r"Handled By[\s:]+([A-Za-z\s.]+)", chunk.page_content)
+        if match:
+            chunk.metadata["handled_by"] = match.group(1).strip()
+
+    # ===============================
+    # Add to vectorstore and save
+    # ===============================
     vectorstore = get_faiss_index()
     if vectorstore:
         vectorstore.add_texts([doc.page_content for doc in chunks], metadatas=[doc.metadata for doc in chunks])
@@ -150,6 +221,13 @@ def process_and_index_pdf(pdf_file, pdf_filename, category=None, skip_s3_upload=
     finish_indexing()
     return True, "PDF indexed successfully." if skip_s3_upload else "PDF uploaded and indexed successfully."
 
+
+
+
+
+
+import re
+
 # ======= SINGLE PDF QUERY ==========
 async def ask_pdf(question, filename, category=None):
     """
@@ -157,48 +235,92 @@ async def ask_pdf(question, filename, category=None):
     """
     temp_path = get_temp_path(filename)
     sanitized_category = sanitize_s3_folder_name(category) if category else None
-    download_success = download_file_from_s3(filename, temp_path, folder=sanitized_category)
-    if not download_success:
-        return "Error downloading PDF from S3."
-    loader = PyPDFLoader(temp_path)
-    docs = loader.load()
-    splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-    chunks = splitter.split_documents(docs)
-    for chunk in chunks:
-        chunk.metadata["source"] = filename
-    if not chunks:
-        return "PDF appears empty or unreadable."
-    from langchain_community.vectorstores import FAISS
-    vectorstore = FAISS.from_documents(chunks, embedding_model)
-    retriever = vectorstore.as_retriever(search_kwargs={"k": 10})
-    retrieved_docs = retriever.get_relevant_documents(question)
-    if not retrieved_docs or not any(d.page_content.strip() for d in retrieved_docs):
-        if os.path.exists(temp_path):
-            os.remove(temp_path)
-        return "Not found in the document."
-    llm = ChatOpenAI(
-        openai_api_key=OPENAI_API_KEY,
-        model="gpt-4o",
-        temperature=0,
-    )
-    qa_chain = RetrievalQA.from_chain_type(
-        llm,
-        retriever=retriever,
-        chain_type="stuff",
-        chain_type_kwargs={"prompt": prompt},
-        return_source_documents=True
-    )
-    result = await run_in_threadpool(qa_chain, {"query": question})
-    raw_answer = result['result'].strip()
-    if os.path.exists(temp_path):
-        os.remove(temp_path)
-    if not raw_answer or "not found" in raw_answer.lower():
-        if retrieved_docs and any(d.page_content.strip() for d in retrieved_docs):
-            context_snippet = retrieved_docs[0].page_content.strip()[:1000]
-            return f"Direct answer not found. Here is the most relevant content from the document:\n\n{context_snippet}"
-        else:
+
+    try:
+        # Download PDF from S3
+        download_success = download_file_from_s3(filename, temp_path, folder=sanitized_category)
+        if not download_success:
+            return "Error downloading PDF from S3."
+
+        # Load and split PDF
+        loader = PyPDFLoader(temp_path)
+        docs = loader.load()
+        splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+        chunks = splitter.split_documents(docs)
+
+        if not chunks:
+            return "PDF appears empty or unreadable."
+
+        # Enrich chunk metadata
+        for chunk in chunks:
+            chunk.metadata["source"] = filename
+
+            # Regex-based metadata enrichment
+            match = re.search(r"(Equipment|Asset)[\s:]+([\w\-]+)", chunk.page_content)
+            if match:
+                chunk.metadata["asset_id"] = match.group(2)
+
+            match = re.search(r"Failure Type[\s:]+([A-Za-z\s]+)", chunk.page_content)
+            if match:
+                chunk.metadata["failure_type"] = match.group(1).strip()
+
+            match = re.search(r"Date[\s:]+(\d{4}-\d{2}-\d{2})", chunk.page_content)
+            if match:
+                chunk.metadata["date"] = match.group(1)
+
+            match = re.search(r"Handled By[\s:]+([A-Za-z\s.]+)", chunk.page_content)
+            if match:
+                chunk.metadata["handled_by"] = match.group(1).strip()
+
+        # Create temporary vectorstore and retriever
+        from langchain_community.vectorstores import FAISS
+        vectorstore = FAISS.from_documents(chunks, embedding_model)
+        retriever = vectorstore.as_retriever(search_kwargs={"k": 10})
+        retrieved_docs = retriever.get_relevant_documents(question)
+
+        if not retrieved_docs or not any(d.page_content.strip() for d in retrieved_docs):
             return "Not found in the document."
-    return raw_answer
+
+        # LLM Q&A
+        llm = ChatOpenAI(
+            openai_api_key=OPENAI_API_KEY,
+            model="gpt-4o",
+            temperature=0,
+        )
+        qa_chain = RetrievalQA.from_chain_type(
+            llm,
+            retriever=retriever,
+            chain_type="stuff",
+            chain_type_kwargs={"prompt": prompt},
+            return_source_documents=True
+        )
+        result = await run_in_threadpool(qa_chain, {"query": question})
+        raw_answer = result['result'].strip()
+
+        if not raw_answer or "not found" in raw_answer.lower():
+            if retrieved_docs and any(d.page_content.strip() for d in retrieved_docs):
+                context_snippet = retrieved_docs[0].page_content.strip()[:1000]
+                return f"Direct answer not found. Here is the most relevant content from the document:\n\n{context_snippet}"
+            else:
+                return "Not found in the document."
+        return raw_answer
+
+    finally:
+        # Always clean up temp file
+        if os.path.exists(temp_path):
+            try:
+                os.remove(temp_path)
+            except Exception as e:
+                print(f"[WARN] Could not delete temp file: {e}")
+
+
+
+
+
+
+
+
+
 
 # ======= GLOBAL QUERY (ALL INDEXED PDFS) ==========
 async def ask_all_pdfs(question, category=None):
@@ -225,6 +347,7 @@ async def ask_all_pdfs(question, category=None):
     )
     result = await run_in_threadpool(qa_chain, {"query": question})
     raw_answer = result['result'].strip()
+
 
     if not raw_answer or "not found" in raw_answer.lower():
         docs = retriever.get_relevant_documents(question)
