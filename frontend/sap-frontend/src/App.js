@@ -442,7 +442,7 @@ useEffect(() => {
     summary.trim().toLowerCase() !== "no analysis available." &&
     summary !== lastSpoken.current
   ) {
-    speakSummary(summary);
+   speakSummary(summary);
     lastSpoken.current = summary;
   }
 }, [predictiveAnalysis]);
@@ -455,16 +455,23 @@ useEffect(() => {
 }, [analysisResult, voiceMode]);
 
 
-// instead of reading the full JSON
-const message = analysisResult?.analysis
-  ? `Predicted failure: ${analysisResult.analysis.predicted_failure || "None"}.
-    Risk score: ${analysisResult.analysis.risk_score || "N/A"}.
-    Recommendation: ${analysisResult.analysis.recommendation || ""}.
-    Action: ${analysisResult.action || ""}`
-  : JSON.stringify(analysisResult);
+// Define what you consider a "valid" result
+const hasValidAnalysis =
+  analysisResult &&
+  analysisResult.analysis &&
+  analysisResult.analysis.predicted_failure &&
+  analysisResult.analysis.risk_score !== undefined && // or your criteria
+  analysisResult.analysis.recommendation;
 
-const msg = new window.SpeechSynthesisUtterance(message);
-window.speechSynthesis.speak(msg);
+if (hasValidAnalysis) {
+  const message = `Predicted failure: ${analysisResult.analysis.predicted_failure}.
+    Risk score: ${analysisResult.analysis.risk_score}.
+    Recommendation: ${analysisResult.analysis.recommendation}.
+    Action: ${analysisResult.action || ""}`;
+
+  const msg = new window.SpeechSynthesisUtterance(message);
+  window.speechSynthesis.speak(msg);
+}
 
 function getPredictiveSummary(analysis) {
  if (!analysis || !analysis.ml_result || !analysis.ml_result.risk_score) return ""; // return blank

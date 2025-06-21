@@ -98,10 +98,10 @@ Major Changes
 
 - **PDF Upload:** Upload one or more SAP PM (or other) PDF files. Files are sanitized and stored in Amazon S3.
 - **Indexing:** On app start (or manual reindex), backend loads PDFs, splits into chunks, embeds with OpenAI, and saves FAISS index locally.
-- **Q&A:**  
-  - *Single PDF:* Select and ask about any uploaded doc  
+- **Q&A:**
+  - *Single PDF:* Select and ask about any uploaded doc
   - *All PDFs:* Ask questions across the entire document library
-- **Predictive Analysis:**  
+- **Predictive Analysis:**
   - Upload sensor logs and enter a custom query (e.g., “Show failures in last 24 hours”)  
   - Instantly get ML-powered risk, failure prediction, recommendations, and action steps  
   - Predictive summary is spoken aloud by the app  
@@ -117,6 +117,7 @@ Major Changes
 
 - **Python FastAPI** – Async API backend  
 - **LangChain** – LLM Q&A, vector search, doc parsing  
+- **LangGraph**- Framework for building stateful, multi-step LLM workflows.
 - **OpenAI GPT-4o** – AI/ML-powered answers and summaries  
 - **FAISS** – Fast PDF chunk indexing/retrieval  
 - **Amazon S3** – Cloud PDF storage  
